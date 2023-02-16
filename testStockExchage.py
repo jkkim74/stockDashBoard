@@ -1,62 +1,63 @@
 import FinanceDataReader as fdr
-import pandas as pd
-import matplotlib.pyplot as plt
-from statsmodels.tsa.filters.hp_filter import hpfilter
 import requests
 import json
+import matplotlib.pyplot as plt
+import pandas as pd
+import math
 
-# Get historical KOSPI index data
-kospi = fdr.DataReader('KS11', '2000-01-01')
+# Download KOSPI index data using FinanceDataReader
+kospi_df = fdr.DataReader('KS11', '2019-01-01', '2022-12-01')
 
-# Get historical USD/KRW exchange rate data
-usd_krw = fdr.DataReader('USD/KRW', '2000-01-01')
-
-# # Get cyclical component of the leading index from Bank of Korea
-# bok = pd.read_html('https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1C8013&conn_path=', header=0, index_col=0)[0]
-# print(bok)
-# bok.index = pd.to_datetime(bok.index)
-# print(bok)
-# bok = bok['종합순환지수']['월별']
-# bok_cycle, bok_trend = hpfilter(bok, lamb=129600)
+# Download Korean won / US dollar exchange rate data using FinanceDataReader
+exchange_rate_df = fdr.DataReader('USD/KRW', '2019-01-01', '2022-12-01')
 
 # Replace [YOUR_API_KEY] with your own API key
 api_key = 'D1S4RQZ081GQX08WPWDC'
 
 # Set the URL with the API key and other parameters
-url = f'http://ecos.bok.or.kr/api/StatisticSearch/{api_key}/json/kr/1/10/036Y001/DD/20000101/20211231/0000001/'
+url = f'https://ecos.bok.or.kr/api/StatisticSearch/{api_key}/json/kr/1/1000/901Y067/M/201901/202212/I16E/'
 
 # Make a GET request to the URL and extract the JSON data
 response = requests.get(url)
 data = json.loads(response.text)
-print(data)
+
 # Extract the cyclical component data
+cyclical_component_data = []
 for item in data['StatisticSearch']['row']:
-    if item['ITEM_NAME1'] == '종합순환지수':
-        leading_index = item['DATA_VALUE']
-    elif item['ITEM_NAME1'] == '지수순환변동치':
-        cyclical_component = item['DATA_VALUE']
-
-bok_cycle, bok_trend = hpfilter(cyclical_component, lamb=129600)
-
-# Print the extracted data
-
-# Plot all three on the same graph
+    if item['ITEM_NAME1'] == '선행지수순환변동치':
+        date = item['TIME']
+        value = math.floor(float(item['DATA_VALUE']))
+        cyclical_component_data.append((date, value))
+print(cyclical_component_data)
+# Convert the cyclical component data to a Pandas DataFrame and set the date column as the index
+cyclical_component_df = pd.DataFrame(cyclical_component_data, columns=['Date', 'Cyclical Component'])
+cyclical_component_df['Date'] = pd.to_datetime(cyclical_component_df['Date'], format='%Y%m')
+cyclical_component_df.set_index('Date', inplace=True)
+# Combine the three DataFrames into one
+combined_df = pd.concat([kospi_df['Close'], exchange_rate_df['Close'], cyclical_component_df], axis=1)
+print(combined_df)
+# Plot the combined data using matplotlib
 fig, ax1 = plt.subplots()
-ax1.plot(kospi.index, kospi['Close'], 'b-', label='KOSPI')
+
+color = 'tab:red'
 ax1.set_xlabel('Date')
-ax1.set_ylabel('KOSPI Index', color='b')
-ax1.tick_params('y', colors='b')
+ax1.set_ylabel('KOSPI', color=color)
+ax1.plot(combined_df.index, combined_df['Close'], color=color)
+ax1.tick_params(axis='y', labelcolor=color)
 
 ax2 = ax1.twinx()
-ax2.plot(usd_krw.index, usd_krw['Close'], 'r-', label='USD/KRW')
-ax2.set_ylabel('USD/KRW Exchange Rate', color='r')
-ax2.tick_params('y', colors='r')
+
+color = 'tab:blue'
+ax2.set_ylabel('KRW/USD', color=color)
+ax2.plot(combined_df.index,  combined_df['Close'], color=color)
+ax2.tick_params(axis='y', labelcolor=color)
 
 ax3 = ax1.twinx()
-ax3.spines['right'].set_position(('axes', 1.1))
-ax3.plot(bok_cycle.index, bok_cycle, 'g-', label='Cyclical Component of Leading Index')
-ax3.set_ylabel('Cyclical Component of Leading Index', color='g')
-ax3.tick_params('y', colors='g')
 
-plt.legend()
+color = 'tab:green'
+ax3.spines['right'].set_position(('axes', 1.1))
+ax3.set_ylabel('Cyclical Component', color=color)
+ax3.plot(combined_df.index,  combined_df['Cyclical Component'], color=color)
+ax3.tick_params(axis='y', labelcolor=color)
+
 plt.show()
