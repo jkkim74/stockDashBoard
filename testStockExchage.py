@@ -6,10 +6,10 @@ import pandas as pd
 import math
 
 # Download KOSPI index data using FinanceDataReader
-kospi_df = fdr.DataReader('KS11', '2019-01-01', '2022-12-01')
+kospi_df = fdr.DataReader('KS11', '2019-01-01', '2022-12-01').resample('M').last()
 
 # Download Korean won / US dollar exchange rate data using FinanceDataReader
-exchange_rate_df = fdr.DataReader('USD/KRW', '2019-01-01', '2022-12-01')
+exchange_rate_df = fdr.DataReader('USD/KRW', '2019-01-01', '2022-12-01').resample('M').last()
 
 # Replace [YOUR_API_KEY] with your own API key
 api_key = 'D1S4RQZ081GQX08WPWDC'
@@ -47,17 +47,17 @@ ax1.tick_params(axis='y', labelcolor=color)
 
 ax2 = ax1.twinx()
 
-color = 'tab:blue'
-ax2.set_ylabel('KRW/USD', color=color)
-ax2.plot(combined_df.index,  combined_df['Close'], color=color)
-ax2.tick_params(axis='y', labelcolor=color)
+color1 = 'tab:blue'
+ax2.set_ylabel('KRW/USD', color=color1)
+ax2.plot(combined_df.index,  combined_df['Close'], color=color1)
+ax2.tick_params(axis='y', labelcolor=color1)
 
 ax3 = ax1.twinx()
 
-color = 'tab:green'
+color2 = 'tab:green'
 ax3.spines['right'].set_position(('axes', 1.1))
-ax3.set_ylabel('Cyclical Component', color=color)
-ax3.plot(combined_df.index,  combined_df['Cyclical Component'], color=color)
-ax3.tick_params(axis='y', labelcolor=color)
+ax3.set_ylabel('Cyclical Component', color=color2)
+ax3.plot(combined_df.index,  combined_df['Cyclical Component'], color=color2)
+ax3.tick_params(axis='y', labelcolor=color2)
 
 plt.show()
