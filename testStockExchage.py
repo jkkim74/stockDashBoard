@@ -15,7 +15,7 @@ exchange_rate_df = fdr.DataReader('USD/KRW', '2019-01-01', '2022-12-01').resampl
 api_key = 'D1S4RQZ081GQX08WPWDC'
 
 # Set the URL with the API key and other parameters
-url = f'https://ecos.bok.or.kr/api/StatisticSearch/{api_key}/json/kr/1/1000/901Y067/M/201901/202212/I16E/'
+url = f'https://ecos.bok.or.kr/api/StatisticSearch/{api_key}/json/kr/1/1000/901Y067/M/201901/202302'
 
 # Make a GET request to the URL and extract the JSON data
 response = requests.get(url)

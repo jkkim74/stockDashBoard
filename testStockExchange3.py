@@ -7,7 +7,7 @@ from datetime import datetime
 #월 단위로 데이터를 제공하고 있는데 2000년 1월 ~ 2022년 12월까지의 데이터를 수집하겠습니다.
 apikey = 'D1S4RQZ081GQX08WPWDC'
 url = 'https://ecos.bok.or.kr/api/StatisticSearch/' + apikey \
-      + '/json/kr/1/100/901Y067/M/202001/202212'
+      + '/json/kr/1/100/901Y067/M/202201/202302'
 response = requests.get(url)
 result = response.json()
 list_total_count = (int)(result['StatisticSearch']['list_total_count'])
@@ -19,7 +19,7 @@ for i in range(0, list_count):
     end = str((i + 1) * 100)
 
     url = 'https://ecos.bok.or.kr/api/StatisticSearch/' + apikey + '/json/kr/' \
-          + start + '/' + end + '/901Y067/M/202001/202212'
+          + start + '/' + end + '/901Y067/M/202201/202302'
     response = requests.get(url)
     result = response.json()
     rows = rows + result['StatisticSearch']['row']
@@ -34,8 +34,8 @@ df=df.astype({'DATA_VALUE':'float'})
 # 수집 데이터중에서 선행지수순환변동치와 동행지수순환변동치만 따로 저장하겠습니다.
 df1=df.loc[df['ITEM_NAME1']=='동행지수순환변동치']
 df2=df.loc[df['ITEM_NAME1']=='선행지수순환변동치']
-
-# 그래프로 확인해볼까요
+print((df2['datetime'], df2['DATA_VALUE']))
+# # 그래프로 확인해볼까요
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -60,8 +60,9 @@ fig.update_layout(
 # 선행지수 및 동행지수와 KOSPI
 # 우선 KOSPI 데이터를 수집하겠습니다.
 enddate=datetime.now().strftime('%Y-%m-%d')
-kospi=yf.download('^KS11', '2020-01-01', enddate, auto_adjust=True)
-
+kospi=yf.download('^KS11', '2022-01-01', enddate, auto_adjust=True)
+##.resample('M').last()
+## print(kospi.index,kospi['Close'])
 # 선행지수순환변동치
 fig = make_subplots(specs=[[{"secondary_y":True}]])
 
