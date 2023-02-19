@@ -60,9 +60,13 @@ fig.update_layout(
 # 선행지수 및 동행지수와 KOSPI
 # 우선 KOSPI 데이터를 수집하겠습니다.
 enddate=datetime.now().strftime('%Y-%m-%d')
-kospi=yf.download('^KS11', '2022-01-01', enddate, auto_adjust=True)
-##.resample('M').last()
+kospi=yf.download('^KS11', '2022-01-01', enddate, auto_adjust=True).resample('M').last()
 ## print(kospi.index,kospi['Close'])
+
+import FinanceDataReader as fdr
+
+# Retrieve the exchange rate data (KRW/USD) with a monthly frequency
+exchange_rate = fdr.DataReader('USD/KRW', '2022-01-01', enddate).resample('M').last()
 # 선행지수순환변동치
 fig = make_subplots(specs=[[{"secondary_y":True}]])
 
@@ -73,6 +77,11 @@ fig.add_trace(
 
 fig.add_trace(
     go.Scatter(x=kospi.index, y=kospi['Close'], name="KOSPI"),
+    secondary_y=True,
+)
+
+fig.add_trace(
+    go.Scatter(x=exchange_rate.index, y=exchange_rate['Close'], name="Exchange Rate"),
     secondary_y=True,
 )
 
