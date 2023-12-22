@@ -7,7 +7,7 @@ from datetime import datetime
 #월 단위로 데이터를 제공하고 있는데 2000년 1월 ~ 2022년 12월까지의 데이터를 수집하겠습니다.
 apikey = 'D1S4RQZ081GQX08WPWDC'
 url = 'https://ecos.bok.or.kr/api/StatisticSearch/' + apikey \
-      + '/json/kr/1/100/901Y067/M/202001/202302'
+      + '/json/kr/1/100/901Y067/M/202001/202311'
 response = requests.get(url)
 result = response.json()
 list_total_count = (int)(result['StatisticSearch']['list_total_count'])
@@ -19,7 +19,7 @@ for i in range(0, list_count):
     end = str((i + 1) * 100)
 
     url = 'https://ecos.bok.or.kr/api/StatisticSearch/' + apikey + '/json/kr/' \
-          + start + '/' + end + '/901Y067/M/202001/202302'
+          + start + '/' + end + '/901Y067/M/202001/202311'
     response = requests.get(url)
     result = response.json()
     rows = rows + result['StatisticSearch']['row']
