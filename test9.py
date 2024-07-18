@@ -60,8 +60,8 @@ fig.add_trace(
 )
 
 fig.update_layout(
-    width=700,
-    height=500,
+    width=800,
+    height=600,
     margin_l=50,
     margin_r=50,
     margin_b=100,
